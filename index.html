@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hasanboy - Typing System</title>
+    <title>Hasanboy & Sanjarbek - Typing System</title>
     <style>
         :root { --neon: #00ff41; --bg: #0a0a0f; --glass: rgba(0, 20, 0, 0.85); }
         * { box-sizing: border-box; outline: none; }
@@ -13,14 +13,14 @@
         .container { width: 100%; max-width: 1000px; padding: 30px; background: var(--glass); border: 2px solid var(--neon); border-radius: 15px; text-align: center; }
         
         /* About qismi stili */
-        .about-section { margin-top: 20px; padding: 15px; border-top: 1px dashed rgba(0,255,65,0.3); font-size: 0.9rem; opacity: 0.8; }
+        .about-section { margin-top: 20px; padding: 15px; border-top: 1px dashed rgba(0,255,65,0.3); font-size: 0.85rem; opacity: 0.8; line-height: 1.5; }
         
         .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
         .btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; cursor: pointer; border-radius: 6px; transition: 0.3s; font-family: inherit; }
         .btn.active { background: var(--neon); color: #000; font-weight: bold; }
         
         .stats-bar { display: flex; justify-content: space-around; padding: 15px; background: rgba(0,255,65,0.05); margin-bottom: 20px; border-radius: 8px; font-size: 1.2rem; }
-        #text-display { font-size: 1.8rem; line-height: 1.5; text-align: left; height: 200px; overflow: hidden; margin: 20px 0; color: #004d1a; padding: 10px; }
+        #text-display { font-size: 1.8rem; line-height: 1.5; text-align: left; height: 180px; overflow: hidden; margin: 15px 0; color: #004d1a; padding: 10px; }
         
         .char { border-bottom: 2px solid transparent; }
         .correct { color: var(--neon); text-shadow: 0 0 5px var(--neon); }
@@ -29,7 +29,7 @@
         
         #hidden-input { position: absolute; opacity: 0; }
         
-        footer { padding: 20px; border-top: 1px solid var(--neon); text-align: center; background: rgba(0,0,0,0.8); }
+        footer { padding: 20px; border-top: 1px solid var(--neon); text-align: center; background: rgba(0,0,0,0.8); line-height: 1.6; }
         footer a { color: var(--neon); text-decoration: none; border-bottom: 1px solid transparent; transition: 0.3s; }
         footer a:hover { border-bottom: 1px solid var(--neon); }
     </style>
@@ -58,16 +58,19 @@
             <div id="text-display"></div>
             <input type="text" id="hidden-input" autofocus autocomplete="off">
 
-            <!-- Yangi About Qismi -->
+            <!-- Yangilangan About Qismi -->
             <div class="about-section">
-                <p>Ushbu tizim matn terish tezligini oshirish uchun <b>Hasanboy</b> tomonidan ishlab chiqildi. <br> 
+                <p>Ushbu tizim matn terish tezligini oshirish uchun <b>Hasanboy</b> va <b>Sanjarbek</b> tomonidan ishlab chiqildi. <br> 
                 Texnologiyalar: HTML5, CSS3 (Matrix Style), JavaScript ES6.</p>
             </div>
         </div>
     </main>
 
     <footer>
-        <p>Architect: <a href="https://t.me/xsT00my" target="_blank">Hasanboy</a></p>
+        <p>Architects: 
+            <a href="https://t.me/xsT00my" target="_blank">Hasanboy</a> & 
+            <a href="https://t.me/Sanjik" target="_blank">Sanjarbek</a>
+        </p>
         <p style="font-size: 0.8rem; opacity: 0.7;">
             <a href="https://github.com/Hasanboy-dev" target="_blank">GitHub</a> | 
             Released: August 2025 | Dev: hasan_dev
@@ -135,7 +138,6 @@
                 else if (typed[i] === s.innerText) s.classList.add('correct');
                 else { s.classList.add('incorrect'); err++; }
                 
-                // Avtomatik skrol (Notebook uchun muhim)
                 if (i === typed.length && i > 20) {
                     s.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
