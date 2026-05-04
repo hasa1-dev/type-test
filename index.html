@@ -8,22 +8,34 @@
         :root { --neon: #00ff41; --bg: #0a0a0f; --glass: rgba(0, 20, 0, 0.85); }
         * { box-sizing: border-box; outline: none; }
         body { margin: 0; background: var(--bg); color: var(--neon); font-family: 'Consolas', monospace; display: flex; flex-direction: column; min-height: 100vh; }
+        
         main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .container { width: 100%; max-width: 1000px; padding: 30px; background: var(--glass); border: 2px solid var(--neon); border-radius: 15px; text-align: center; }
+        
+        /* About qismi stili */
+        .about-section { margin-top: 20px; padding: 15px; border-top: 1px dashed rgba(0,255,65,0.3); font-size: 0.9rem; opacity: 0.8; }
+        
         .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
-        .btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; cursor: pointer; border-radius: 6px; transition: 0.3s; }
+        .btn { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 8px 15px; cursor: pointer; border-radius: 6px; transition: 0.3s; font-family: inherit; }
         .btn.active { background: var(--neon); color: #000; font-weight: bold; }
+        
         .stats-bar { display: flex; justify-content: space-around; padding: 15px; background: rgba(0,255,65,0.05); margin-bottom: 20px; border-radius: 8px; font-size: 1.2rem; }
-        #text-display { font-size: 1.8rem; line-height: 1.5; text-align: left; height: 200px; overflow: hidden; margin: 20px 0; color: #004d1a; padding: 10px; border-radius: 8px; }
+        #text-display { font-size: 1.8rem; line-height: 1.5; text-align: left; height: 200px; overflow: hidden; margin: 20px 0; color: #004d1a; padding: 10px; }
+        
         .char { border-bottom: 2px solid transparent; }
         .correct { color: var(--neon); text-shadow: 0 0 5px var(--neon); }
         .incorrect { color: #ff3e3e; background: rgba(255,62,62,0.2); }
         .current { border-bottom: 3px solid var(--neon); }
+        
         #hidden-input { position: absolute; opacity: 0; }
-        footer { padding: 20px; border-top: 1px solid var(--neon); text-align: center; }
+        
+        footer { padding: 20px; border-top: 1px solid var(--neon); text-align: center; background: rgba(0,0,0,0.8); }
+        footer a { color: var(--neon); text-decoration: none; border-bottom: 1px solid transparent; transition: 0.3s; }
+        footer a:hover { border-bottom: 1px solid var(--neon); }
     </style>
 </head>
 <body onclick="document.getElementById('hidden-input').focus()">
+
     <main>
         <div class="container" id="main-ui">
             <div class="controls">
@@ -36,25 +48,37 @@
                 <button class="btn time-btn" onclick="setTime(60, this)">60s</button>
                 <button class="btn time-btn" onclick="setTime(90, this)">90s</button>
             </div>
+
             <div class="stats-bar">
                 <span>TIME: <b id="timer">30</b>s</span>
                 <span>WPM: <b id="wpm">0</b></span>
                 <span>ERRORS: <b id="errors">0</b></span>
             </div>
+
             <div id="text-display"></div>
             <input type="text" id="hidden-input" autofocus autocomplete="off">
+
+            <!-- Yangi About Qismi -->
+            <div class="about-section">
+                <p>Ushbu tizim matn terish tezligini oshirish uchun <b>Hasanboy</b> tomonidan ishlab chiqildi. <br> 
+                Texnologiyalar: HTML5, CSS3 (Matrix Style), JavaScript ES6.</p>
+            </div>
         </div>
     </main>
+
     <footer>
-        <p>Architect: <span style="color: #fff">Hasanboy</span></p>
-        <p style="font-size: 0.8rem; opacity: 0.7;">Dev: hasan_dev | 2026</p>
+        <p>Architect: <a href="https://t.me/xsT00my" target="_blank">Hasanboy</a></p>
+        <p style="font-size: 0.8rem; opacity: 0.7;">
+            <a href="https://github.com/Hasanboy-dev" target="_blank">GitHub</a> | 
+            Released: August 2025 | Dev: hasan_dev
+        </p>
     </footer>
 
     <script>
         const wordBank = {
-            uz: ["xavfsizlik", "kirish", "ma'lumot", "natija", "kelajak", "algoritm", "zamonaviy", "klaviatura", "bajarish", "server", "obyekt", "parol", "tahlil", "blok", "ilova", "bilim", "ishonch", "mantiq"],
-            en: ["security", "login", "data", "result", "future", "algorithm", "modern", "keyboard", "execute", "server", "object", "password", "analysis", "block", "application", "knowledge", "trust", "logic"],
-            ru: ["защита", "вход", "данные", "результат", "будущее", "алгоритм", "современный", "клавиатура", "выполнить", "сервер", "объект", "пароль", "анализ", "блок", "приложение", "знания", "доверие", "логика"]
+            uz: ["xavfsizlik", "kirish", "ma'lumot", "natija", "kelajak", "algoritm", "zamonaviy", "klaviatura", "bajarish", "server", "obyekt", "parol", "tahlil", "blok", "ilova", "bilim", "ishonch", "mantiq", "funksiya", "tizim"],
+            en: ["security", "login", "data", "result", "future", "algorithm", "modern", "keyboard", "execute", "server", "object", "password", "analysis", "block", "application", "knowledge", "trust", "logic", "function", "system"],
+            ru: ["защита", "вход", "данные", "результат", "будущее", "алгоритм", "современный", "клавиатура", "выполнить", "сервер", "объект", "пароль", "анализ", "блок", "приложение", "знания", "доверие", "логика", "функция", "система"]
         };
 
         let currentLang = 'uz', maxTime = 30, timeLeft = 30, isPlaying = false, timer = null;
@@ -64,7 +88,7 @@
         function init() {
             if (timer) clearInterval(timer);
             const words = wordBank[currentLang];
-            let text = Array.from({length: 100}, () => words[Math.floor(Math.random() * words.length)]).join(' ');
+            let text = Array.from({length: 120}, () => words[Math.floor(Math.random() * words.length)]).join(' ');
             display.innerHTML = text.split('').map((c, i) => `<span class="char ${i===0?'current':''}">${c}</span>`).join('');
             input.value = ""; timeLeft = maxTime; isPlaying = false;
             document.getElementById('timer').innerText = timeLeft;
@@ -92,8 +116,14 @@
             if (!isPlaying && input.value.length > 0) {
                 isPlaying = true;
                 timer = setInterval(() => {
-                    if (timeLeft > 0) { timeLeft--; document.getElementById('timer').innerText = timeLeft; }
-                    else { clearInterval(timer); alert("Vaqt tugadi! WPM: " + document.getElementById('wpm').innerText); init(); }
+                    if (timeLeft > 0) { 
+                        timeLeft--; 
+                        document.getElementById('timer').innerText = timeLeft; 
+                    } else { 
+                        clearInterval(timer); 
+                        alert("Vaqt tugadi! Sening natijang: " + document.getElementById('wpm').innerText + " WPM"); 
+                        init(); 
+                    }
                 }, 1000);
             }
             const spans = display.querySelectorAll('.char');
@@ -104,9 +134,15 @@
                 if (typed[i] == null) { if (i === typed.length) s.classList.add('current'); }
                 else if (typed[i] === s.innerText) s.classList.add('correct');
                 else { s.classList.add('incorrect'); err++; }
+                
+                // Avtomatik skrol (Notebook uchun muhim)
+                if (i === typed.length && i > 20) {
+                    s.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             });
             document.getElementById('errors').innerText = err;
-            let wpm = Math.round(((typed.length - err) / 5) / ((maxTime - timeLeft) / 60 || 0.01));
+            let elapsed = (maxTime - timeLeft) / 60;
+            let wpm = Math.round(((typed.length - err) / 5) / (elapsed || 0.01));
             document.getElementById('wpm').innerText = wpm > 0 ? wpm : 0;
         });
 
