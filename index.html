@@ -15,7 +15,7 @@
             display: flex; 
             flex-direction: column; 
             min-height: 100vh; 
-            overflow: hidden; 
+            overflow-x: hidden; 
         }
         
         main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -59,17 +59,15 @@
             font-size: 1.8rem; 
             line-height: 1.6; 
             text-align: left; 
-            height: 200px; 
-            overflow-y: auto; 
+            height: 180px; 
+            overflow-y: hidden; 
             margin: 15px 0; 
             color: rgba(0, 255, 65, 0.3); 
             padding: 15px; 
             user-select: none;
-            scrollbar-width: none;
         }
-        #text-display::-webkit-scrollbar { display: none; }
         
-        .char { position: relative; transition: 0.1s; }
+        .char { position: relative; transition: 0.1s; border-bottom: 2px solid transparent; }
         .correct { color: var(--neon); text-shadow: 0 0 8px var(--neon); }
         .incorrect { color: #ff3e3e; background: rgba(255,62,62,0.2); border-radius: 2px; }
         .current { border-bottom: 3px solid var(--neon); animation: blink 1s infinite; }
@@ -93,15 +91,16 @@
             box-shadow: 0 0 100px rgba(0, 255, 65, 0.3);
             border-radius: 20px;
         }
-        .motivation-text { font-size: 1.2rem; margin: 20px 0; color: #fff; line-height: 1.4; }
+        .motivation-text { font-size: 1.1rem; margin: 20px 0; color: #fff; line-height: 1.4; font-style: italic; }
         .final-stats { font-size: 3.5rem; color: var(--neon); font-weight: bold; }
 
         .about-section { 
-            margin-top: 20px; 
-            padding: 15px; 
+            margin-top: 25px; 
+            padding-top: 20px; 
             border-top: 1px dashed rgba(0,255,65,0.3); 
-            font-size: 0.85rem; 
-            opacity: 0.8; 
+            font-size: 0.9rem; 
+            opacity: 0.9; 
+            line-height: 1.6;
         }
 
         footer { padding: 15px; border-top: 1px solid var(--neon); text-align: center; background: rgba(0,0,0,0.9); }
@@ -142,7 +141,8 @@
             <input type="text" id="hidden-input" autofocus autocomplete="off">
 
             <div class="about-section">
-                <p>Ushbu tizim matn terish tezligini oshirish uchun <b>Hasanboy</b> va <b>Sanjarbek</b> tomonidan ishlab chiqildi.</p>
+                <p>Ushbu tizim matn terish tezligini oshirish uchun <b>Hasanboy</b> va <b>Sanjarbek</b> tomonidan ishlab chiqildi. <br> 
+                Texnologiyalar: HTML5, CSS3 (Matrix Style), JavaScript ES6.</p>
             </div>
         </div>
     </main>
@@ -151,6 +151,9 @@
         <p>Architects: 
             <a href="https://t.me/xsT00my" target="_blank">Hasanboy</a> & 
             <a href="https://t.me/saSOObr" target="_blank">Sanjarbek</a>
+        </p>
+        <p style="font-size: 0.8rem; opacity: 0.7;">
+            Released: August 2025 | Last Updated: March 2026
         </p>
     </footer>
 
@@ -167,14 +170,12 @@
         const modal = document.getElementById('result-modal');
 
         function init() {
-            // Tozalash
             if (timer) clearInterval(timer);
             timer = null;
             isPlaying = false;
             timeLeft = maxTime;
             input.value = "";
             
-            // UI reset
             document.getElementById('timer').innerText = timeLeft;
             document.getElementById('wpm').innerText = "0";
             document.getElementById('errors').innerText = "0";
@@ -182,7 +183,6 @@
             display.style.filter = "none";
             display.style.opacity = "1";
 
-            // Matn generatsiyasi
             const words = wordBank[currentLang];
             let text = Array.from({length: 100}, () => words[Math.floor(Math.random() * words.length)]).join(' ');
             display.innerHTML = text.split('').map((c, i) => `<span class="char ${i===0?'current':''}">${c}</span>`).join('');
@@ -193,21 +193,12 @@
 
         function showResult(wpm) {
             let msg = "";
-            let color = "#00ff41";
-
-            if (wpm < 25) {
-                msg = "Yaxshi urinish! Ko'proq mashq qiling, tezlik albatta oshadi. 💪";
-            } else if (wpm < 45) {
-                msg = "Ajoyib! Siz o'rtacha darajadasiz. Yana biroz harakat qilsangiz rekord berasiz! 🚀";
-            } else if (wpm < 65) {
-                msg = "Dahshat! Sizning barmoqlaringiz klaviatura bilan tillashyapti! ⚡";
-            } else {
-                msg = "HAKKER DARAJASI! 🤖 Siz haqiqiy matn terish ustasisiz! Legend!";
-                color = "#FFD700";
-            }
+            if (wpm < 25) msg = "Yaxshi urinish! Ko'proq mashq qiling, tezlik albatta oshadi. 💪";
+            else if (wpm < 45) msg = "Ajoyib! Siz o'rtacha darajadasiz. Yana biroz harakat qilsangiz rekord berasiz! 🚀";
+            else if (wpm < 65) msg = "Dahshat! Sizning barmoqlaringiz klaviatura bilan tillashyapti! ⚡";
+            else msg = "HAKKER DARAJASI! 🤖 Siz haqiqiy matn terish ustasisiz! Legend!";
 
             document.getElementById('res-wpm').innerText = wpm;
-            document.getElementById('res-wpm').style.color = color;
             document.getElementById('motivation-msg').innerText = msg;
             
             display.style.filter = "blur(8px)";
@@ -255,15 +246,10 @@
                 if (typed[i] == null) { 
                     if (i === typed.length) s.classList.add('current'); 
                 } else {
-                    if (typed[i] === s.innerText) {
-                        s.classList.add('correct');
-                    } else {
-                        s.classList.add('incorrect');
-                        err++;
-                    }
+                    if (typed[i] === s.innerText) s.classList.add('correct');
+                    else { s.classList.add('incorrect'); err++; }
                 }
                 
-                // Avtomatik skroll
                 if (i === typed.length && i > 20) {
                     s.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
@@ -272,12 +258,10 @@
             document.getElementById('errors').innerText = err;
             let timeUsed = (maxTime - timeLeft);
             if (timeUsed <= 0) timeUsed = 1;
-            
             let wpm = Math.round(((typed.length - err) / 5) / (timeUsed / 60));
             document.getElementById('wpm').innerText = wpm > 0 ? wpm : 0;
         });
 
-        // Sahifa yuklanganda ishga tushirish
         window.onload = init;
     </script>
 </body>
