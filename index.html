@@ -51,6 +51,7 @@
             box-shadow: 0 0 25px rgba(0, 255, 65, 0.2);
         }
 
+        /* Login Oynasi - Hacker Style */
         #login-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -102,25 +103,28 @@
             border: 1px solid rgba(0, 255, 65, 0.3);
             margin-bottom: 20px; 
             background: rgba(0,0,0,0.5);
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         #text-display { 
-            font-size: 1.5rem; 
+            font-size: 1.4rem; 
             line-height: 1.6; 
             text-align: left; 
-            min-height: 150px;
+            min-height: 120px;
             margin: 20px 0; 
-            color: rgba(0, 255, 65, 0.25); 
+            color: rgba(0, 255, 65, 0.2); 
             padding: 15px; 
             word-wrap: break-word;
+            user-select: none;
         }
         
-        .char { transition: 0.05s; }
-        .correct { color: var(--neon); text-shadow: 0 0 5px var(--neon); }
-        .incorrect { color: #ff0000; background: rgba(255, 0, 0, 0.3); }
-        .current { background: rgba(0, 255, 65, 0.3); border-left: 2px solid var(--neon); animation: pulse 0.8s infinite; }
+        .char { transition: 0.05s; position: relative; }
+        .correct { color: var(--neon); text-shadow: 0 0 8px var(--neon); }
+        .incorrect { color: #ff0000; background: rgba(255, 0, 0, 0.2); border-radius: 2px; }
+        .current { border-bottom: 2px solid var(--neon); animation: blink 0.8s infinite; }
         
-        @keyframes pulse { 50% { background: transparent; } }
+        @keyframes blink { 50% { border-color: transparent; } }
 
         #hidden-input { position: fixed; top: -100px; opacity: 0; }
 
@@ -128,27 +132,33 @@
             margin-top: 30px; 
             padding: 15px;
             border-top: 1px solid rgba(0,255,65,0.2); 
-            font-size: 0.85rem; 
+            font-size: 0.9rem; 
         }
 
-        footer { padding: 20px; text-align: center; background: rgba(0,0,0,0.9); }
-        footer a { color: var(--neon); text-decoration: none; }
+        footer { padding: 20px; text-align: center; background: rgba(0,0,0,0.9); width: 100%; }
+        footer a { color: var(--neon); text-decoration: none; border-bottom: 1px solid transparent; }
+        footer a:hover { border-bottom: 1px solid var(--neon); }
+
+        /* Mobil qurilmalar uchun moslashuvchanlik */
+        @media (max-width: 600px) {
+            #text-display { font-size: 1.1rem; }
+            .container { padding: 15px; }
+            .btn { padding: 6px 12px; font-size: 0.75rem; }
+        }
     </style>
 </head>
 <body onclick="focusGame()">
 
-    <!-- LOGIN OYNASI -->
     <div id="login-overlay">
         <div class="login-card">
-            <h2 style="margin-bottom: 20px;">ACCESS GRANTED</h2>
-            <!-- onclick="event.stopPropagation()" input bosilganda body-dagi fokus funksiyasi ishlamasligi uchun -->
-            <input type="email" id="email" placeholder="EMAIL ADDRESS..." onclick="event.stopPropagation()">
-            <input type="password" id="password" placeholder="PASSWORD..." onclick="event.stopPropagation()">
+            <h2 style="margin-bottom: 20px; letter-spacing: 2px;">ACCESS REQUIRED</h2>
+            <input type="email" id="email" placeholder="TERMINAL_ID (EMAIL)..." onclick="event.stopPropagation()">
+            <input type="password" id="password" placeholder="ACCESS_KEY (PASS)..." onclick="event.stopPropagation()">
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="btn active" style="flex: 1;" onclick="handleAuth('login')">LOGIN</button>
                 <button class="btn" style="flex: 1;" onclick="handleAuth('signup')">SIGN UP</button>
             </div>
-            <p id="auth-error" style="color: #ff0000; font-size: 0.8rem; margin-top: 10px;"></p>
+            <p id="auth-error" style="color: #ff0000; font-size: 0.75rem; margin-top: 15px; min-height: 20px;"></p>
         </div>
     </div>
 
@@ -160,19 +170,21 @@
                 <button class="btn time-btn" onclick="setTime(15, this)">15s</button>
                 <button class="btn time-btn active" onclick="setTime(30, this)">30s</button>
                 <button class="btn time-btn" onclick="setTime(60, this)">60s</button>
+                <button class="btn time-btn" onclick="setTime(90, this)">90s</button>
             </div>
 
             <div class="stats-bar">
-                <span>ID: <b id="user-display">---</b></span>
-                <span>TIME: <b id="timer">30</b>s</span>
-                <span>WPM: <b id="wpm">0</b></span>
+                <span>USER: <b id="user-display">GUEST</b></span>
+                <span>TIMER: <b id="timer">30</b>s</span>
+                <span>SPEED: <b id="wpm">0</b> WPM</span>
+                <span>ACC: <b id="accuracy">100</b>%</span>
             </div>
 
             <div id="text-display"></div>
-            <input type="text" id="hidden-input" autocomplete="off">
+            <input type="text" id="hidden-input" autocomplete="off" spellcheck="false">
 
             <div class="about-section">
-                <p>Architects: <b>Hasanboy</b> & <b>Sanjarbek</b>. System v2.0</p>
+                <p>Architects: <b>Hasanboy</b> & <b>Sanjarbek</b> [System v2.0]</p>
             </div>
         </div>
     </main>
@@ -182,97 +194,102 @@
     </footer>
 
     <script>
-        // Firebase Config - Buni o'zingizniki bilan almashtirishni unutmang
-        const firebaseConfig = { 
-            apiKey: "YOUR_API_KEY", 
-            authDomain: "YOUR_PROJECT.firebaseapp.com", 
-            projectId: "YOUR_PROJECT_ID" 
+        // Rasmda (image_e6a216.png) ko'rsatilgan haqiqiy Firebase sozlamalari
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMlnVkcw1shnK_rFKSfrZqofViB5J3wGo",
+            authDomain: "type-test-9.firebaseapp.com",
+            projectId: "type-test-9",
+            storageBucket: "type-test-9.firebasestorage.app",
+            messagingSenderId: "321070843199",
+            appId: "1:321070843199:web:cdfcdf67ce64da0beabf8a",
+            measurementId: "G-K21PXXTNTZ"
         };
         firebase.initializeApp(firebaseConfig);
 
         const wordBank = {
-            uz: ["tizim", "xavfsizlik", "algoritm", "klaviatura", "bajarish", "mantiq", "server", "ma'lumot", "dastur", "kodlash", "tarmoq", "foydalanuvchi"],
-            en: ["system", "security", "algorithm", "keyboard", "execute", "logic", "server", "database", "program", "coding", "network", "user"]
+            uz: ["tizim", "xavfsizlik", "algoritm", "klaviatura", "bajarish", "mantiq", "server", "ma'lumot", "dastur", "kodlash", "tarmoq", "foydalanuvchi", "xaker", "kriptografiya", "interfeys"],
+            en: ["system", "security", "algorithm", "keyboard", "execute", "logic", "server", "database", "program", "coding", "network", "user", "hacker", "encryption", "interface"]
         };
 
-        let currentLang = 'uz', maxTime = 30, timeLeft = 30, isPlaying = false, timer = null;
+        let currentLang = 'uz', maxTime = 30, timeLeft = 30, isPlaying = false, timerInterval = null;
         const display = document.getElementById('text-display');
         const input = document.getElementById('hidden-input');
 
-        // Fokus mantiqi
         function focusGame() {
-            const overlay = document.getElementById('login-overlay');
-            if (overlay.style.display === 'none') {
+            if (document.getElementById('login-overlay').style.display === 'none') {
                 input.focus();
             }
         }
 
-        // Auth Mantiqi
         function handleAuth(type) {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             const errorElement = document.getElementById('auth-error');
 
             if(!email || !pass) {
-                errorElement.innerText = "Email va parolni kiriting!";
+                errorElement.innerText = "MISSING_CREDENTIALS: Email and password required.";
                 return;
             }
 
             if(type === 'login') {
                 firebase.auth().signInWithEmailAndPassword(email, pass)
                     .then(res => { 
-                        document.getElementById('user-display').innerText = res.user.email.split('@')[0];
+                        document.getElementById('user-display').innerText = res.user.email.split('@')[0].toUpperCase();
                         document.getElementById('login-overlay').style.display = 'none';
                         init();
                     })
-                    .catch(err => errorElement.innerText = "Xatolik: " + err.message);
+                    .catch(err => errorElement.innerText = "AUTH_ERROR: " + err.message);
             } else {
                 firebase.auth().createUserWithEmailAndPassword(email, pass)
-                    .then(() => alert("Ro'yxatdan o'tdingiz! Endi Login qiling."))
-                    .catch(err => errorElement.innerText = "Xatolik: " + err.message);
+                    .then(() => alert("REGISTRATION_SUCCESS: Please login now."))
+                    .catch(err => errorElement.innerText = "REG_ERROR: " + err.message);
             }
         }
 
         function init() {
-            if (timer) clearInterval(timer);
+            if (timerInterval) clearInterval(timerInterval);
             isPlaying = false; 
             timeLeft = maxTime;
             input.value = "";
             document.getElementById('timer').innerText = timeLeft;
             document.getElementById('wpm').innerText = "0";
+            document.getElementById('accuracy').innerText = "100";
             
             const words = wordBank[currentLang];
-            let text = Array.from({length: 50}, () => words[Math.floor(Math.random() * words.length)]).join(' ');
-            display.innerHTML = text.split('').map((c, i) => `<span class="char ${i===0?'current':''}">${c}</span>`).join('');
-            input.focus();
+            let generatedText = Array.from({length: 60}, () => words[Math.floor(Math.random() * words.length)]).join(' ');
+            display.innerHTML = generatedText.split('').map((c, i) => `<span class="char ${i===0?'current':''}">${c}</span>`).join('');
+            focusGame();
         }
 
         input.addEventListener('input', () => {
             if (!isPlaying && input.value.length > 0) {
                 isPlaying = true;
-                timer = setInterval(() => {
+                timerInterval = setInterval(() => {
                     if (timeLeft > 0) { 
                         timeLeft--; 
                         document.getElementById('timer').innerText = timeLeft; 
                     } else { 
-                        clearInterval(timer); 
+                        clearInterval(timerInterval); 
                         isPlaying = false; 
-                        alert("Vaqt tugadi! Sening natijang: " + document.getElementById('wpm').innerText + " WPM"); 
+                        const finalWpm = document.getElementById('wpm').innerText;
+                        const finalAcc = document.getElementById('accuracy').innerText;
+                        alert(`SESSION_END\nSpeed: ${finalWpm} WPM\nAccuracy: ${finalAcc}%`); 
                         init(); 
                     }
                 }, 1000);
             }
 
             const spans = display.querySelectorAll('.char');
-            const typed = input.value.split('');
+            const typedChars = input.value.split('');
             let correctCount = 0;
+            let totalTyped = typedChars.length;
 
             spans.forEach((s, i) => {
                 s.classList.remove('correct', 'incorrect', 'current');
-                if (typed[i] == null) {
-                    if (i === typed.length) s.classList.add('current');
+                if (typedChars[i] == null) {
+                    if (i === totalTyped) s.classList.add('current');
                 } else {
-                    if (typed[i] === s.innerText) { 
+                    if (typedChars[i] === s.innerText) { 
                         s.classList.add('correct'); 
                         correctCount++; 
                     } else {
@@ -281,10 +298,16 @@
                 }
             });
 
-            // Backspace funksiyasi input.value orqali tabiiy ishlaydi
+            // WPM va Accuracy hisoblash
             let timeUsed = (maxTime - timeLeft) || 1;
             let wpm = Math.round((correctCount / 5) / (timeUsed / 60));
+            let accuracy = totalTyped > 0 ? Math.round((correctCount / totalTyped) * 100) : 100;
+            
             document.getElementById('wpm').innerText = wpm;
+            document.getElementById('accuracy').innerText = accuracy;
+
+            // Agar matn tugasa, yangisini yuklash
+            if (totalTyped >= spans.length) init();
         });
 
         function setTime(s, btn) { 
