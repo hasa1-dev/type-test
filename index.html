@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hasanboy & Sanjarbek - Typing System v2.0</title>
-    <!-- Firebase SDK (Dasturni ishlashi uchun zarur) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <style>
@@ -51,7 +51,6 @@
             box-shadow: 0 0 25px rgba(0, 255, 65, 0.2);
         }
 
-        /* LOGIN MODAL - Haqiqiy Email/Parol bilan */
         #login-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -59,6 +58,7 @@
             display: flex; align-items: center; justify-content: center;
             z-index: 2000;
         }
+
         .login-card {
             background: rgba(0, 40, 0, 0.3);
             border: 2px solid var(--neon);
@@ -68,6 +68,7 @@
             max-width: 380px;
             box-shadow: 0 0 30px var(--neon);
         }
+
         .login-card input {
             width: 100%;
             background: #000;
@@ -80,6 +81,7 @@
         }
         
         .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        
         .btn { 
             background: transparent; 
             border: 1px solid var(--neon); 
@@ -90,8 +92,8 @@
             text-transform: uppercase;
             font-size: 0.85rem;
         }
+
         .btn.active { background: var(--neon); color: #000; font-weight: bold; box-shadow: 0 0 15px var(--neon); }
-        .btn:hover:not(.active) { background: rgba(0, 255, 65, 0.2); }
         
         .stats-bar { 
             display: flex; 
@@ -113,41 +115,35 @@
             word-wrap: break-word;
         }
         
-        .char { transition: 0.05s; border-left: 1px solid transparent; }
+        .char { transition: 0.05s; }
         .correct { color: var(--neon); text-shadow: 0 0 5px var(--neon); }
         .incorrect { color: #ff0000; background: rgba(255, 0, 0, 0.3); }
         .current { background: rgba(0, 255, 65, 0.3); border-left: 2px solid var(--neon); animation: pulse 0.8s infinite; }
         
         @keyframes pulse { 50% { background: transparent; } }
 
-        #hidden-input { position: fixed; top: -100px; }
+        #hidden-input { position: fixed; top: -100px; opacity: 0; }
 
         .about-section { 
             margin-top: 30px; 
             padding: 15px;
             border-top: 1px solid rgba(0,255,65,0.2); 
             font-size: 0.85rem; 
-            line-height: 1.5;
         }
 
-        footer { padding: 20px; text-align: center; font-size: 0.9rem; background: rgba(0,0,0,0.9); }
-        footer a { color: var(--neon); text-decoration: none; border-bottom: 1px solid var(--neon); }
-        
-        /* Mobile adjustment */
-        @media (max-width: 600px) {
-            #text-display { font-size: 1.2rem; }
-            .container { padding: 15px; }
-        }
+        footer { padding: 20px; text-align: center; background: rgba(0,0,0,0.9); }
+        footer a { color: var(--neon); text-decoration: none; }
     </style>
 </head>
-<body onclick="document.getElementById('hidden-input').focus()">
+<body onclick="focusGame()">
 
-    <!-- HACKER LOGIN WINDOW -->
+    <!-- LOGIN OYNASI -->
     <div id="login-overlay">
         <div class="login-card">
             <h2 style="margin-bottom: 20px;">ACCESS GRANTED</h2>
-            <input type="email" id="email" placeholder="EMAIL ADDRESS...">
-            <input type="password" id="password" placeholder="PASSWORD...">
+            <!-- onclick="event.stopPropagation()" input bosilganda body-dagi fokus funksiyasi ishlamasligi uchun -->
+            <input type="email" id="email" placeholder="EMAIL ADDRESS..." onclick="event.stopPropagation()">
+            <input type="password" id="password" placeholder="PASSWORD..." onclick="event.stopPropagation()">
             <div style="display: flex; gap: 10px; margin-top: 15px;">
                 <button class="btn active" style="flex: 1;" onclick="handleAuth('login')">LOGIN</button>
                 <button class="btn" style="flex: 1;" onclick="handleAuth('signup')">SIGN UP</button>
@@ -167,8 +163,8 @@
             </div>
 
             <div class="stats-bar">
-                <span>SYSTEM_ID: <b id="user-display">UNIDENTIFIED</b></span>
-                <span>TIMER: <b id="timer">30</b>s</span>
+                <span>ID: <b id="user-display">---</b></span>
+                <span>TIME: <b id="timer">30</b>s</span>
                 <span>WPM: <b id="wpm">0</b></span>
             </div>
 
@@ -176,8 +172,7 @@
             <input type="text" id="hidden-input" autocomplete="off">
 
             <div class="about-section">
-                <p>Architects: <b>Hasanboy</b> & <b>Sanjarbek</b>. <br> 
-                Authorized usage only. System version 2.0.0_matrix.</p>
+                <p>Architects: <b>Hasanboy</b> & <b>Sanjarbek</b>. System v2.0</p>
             </div>
         </div>
     </main>
@@ -187,24 +182,41 @@
     </footer>
 
     <script>
-        // Firebase Config (O'zingiznikini bu yerga qo'ying)
-        const firebaseConfig = { apiKey: "YOUR_API_KEY", authDomain: "YOUR_PROJECT.firebaseapp.com", projectId: "YOUR_PROJECT_ID" };
+        // Firebase Config - Buni o'zingizniki bilan almashtirishni unutmang
+        const firebaseConfig = { 
+            apiKey: "YOUR_API_KEY", 
+            authDomain: "YOUR_PROJECT.firebaseapp.com", 
+            projectId: "YOUR_PROJECT_ID" 
+        };
         firebase.initializeApp(firebaseConfig);
 
         const wordBank = {
-            uz: ["tizim", "xavfsizlik", "algoritm", "klaviatura", "bajarish", "mantiq", "server", "ma'lumot", "dastur"],
-            en: ["system", "security", "algorithm", "keyboard", "execute", "logic", "server", "database", "program"]
+            uz: ["tizim", "xavfsizlik", "algoritm", "klaviatura", "bajarish", "mantiq", "server", "ma'lumot", "dastur", "kodlash", "tarmoq", "foydalanuvchi"],
+            en: ["system", "security", "algorithm", "keyboard", "execute", "logic", "server", "database", "program", "coding", "network", "user"]
         };
 
         let currentLang = 'uz', maxTime = 30, timeLeft = 30, isPlaying = false, timer = null;
         const display = document.getElementById('text-display');
         const input = document.getElementById('hidden-input');
 
+        // Fokus mantiqi
+        function focusGame() {
+            const overlay = document.getElementById('login-overlay');
+            if (overlay.style.display === 'none') {
+                input.focus();
+            }
+        }
+
         // Auth Mantiqi
         function handleAuth(type) {
             const email = document.getElementById('email').value;
             const pass = document.getElementById('password').value;
             const errorElement = document.getElementById('auth-error');
+
+            if(!email || !pass) {
+                errorElement.innerText = "Email va parolni kiriting!";
+                return;
+            }
 
             if(type === 'login') {
                 firebase.auth().signInWithEmailAndPassword(email, pass)
@@ -223,12 +235,14 @@
 
         function init() {
             if (timer) clearInterval(timer);
-            isPlaying = false; timeLeft = maxTime;
+            isPlaying = false; 
+            timeLeft = maxTime;
             input.value = "";
             document.getElementById('timer').innerText = timeLeft;
+            document.getElementById('wpm').innerText = "0";
             
             const words = wordBank[currentLang];
-            let text = Array.from({length: 40}, () => words[Math.floor(Math.random() * words.length)]).join(' ');
+            let text = Array.from({length: 50}, () => words[Math.floor(Math.random() * words.length)]).join(' ');
             display.innerHTML = text.split('').map((c, i) => `<span class="char ${i===0?'current':''}">${c}</span>`).join('');
             input.focus();
         }
@@ -237,8 +251,15 @@
             if (!isPlaying && input.value.length > 0) {
                 isPlaying = true;
                 timer = setInterval(() => {
-                    if (timeLeft > 0) { timeLeft--; document.getElementById('timer').innerText = timeLeft; }
-                    else { clearInterval(timer); isPlaying = false; alert("Vaqt tugadi! WPM: " + document.getElementById('wpm').innerText); init(); }
+                    if (timeLeft > 0) { 
+                        timeLeft--; 
+                        document.getElementById('timer').innerText = timeLeft; 
+                    } else { 
+                        clearInterval(timer); 
+                        isPlaying = false; 
+                        alert("Vaqt tugadi! Sening natijang: " + document.getElementById('wpm').innerText + " WPM"); 
+                        init(); 
+                    }
                 }, 1000);
             }
 
@@ -251,18 +272,34 @@
                 if (typed[i] == null) {
                     if (i === typed.length) s.classList.add('current');
                 } else {
-                    if (typed[i] === s.innerText) { s.classList.add('correct'); correctCount++; }
-                    else s.classList.add('incorrect');
+                    if (typed[i] === s.innerText) { 
+                        s.classList.add('correct'); 
+                        correctCount++; 
+                    } else {
+                        s.classList.add('incorrect');
+                    }
                 }
             });
 
+            // Backspace funksiyasi input.value orqali tabiiy ishlaydi
             let timeUsed = (maxTime - timeLeft) || 1;
             let wpm = Math.round((correctCount / 5) / (timeUsed / 60));
             document.getElementById('wpm').innerText = wpm;
         });
 
-        function setTime(s, btn) { maxTime = s; document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); init(); }
-        function changeLang(l, btn) { currentLang = l; document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); init(); }
+        function setTime(s, btn) { 
+            maxTime = s; 
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active')); 
+            btn.classList.add('active'); 
+            init(); 
+        }
+
+        function changeLang(l, btn) { 
+            currentLang = l; 
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); 
+            btn.classList.add('active'); 
+            init(); 
+        }
     </script>
 </body>
 </html>
