@@ -3,325 +3,268 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hasanboy & Sanjarbek - Typing System v2.0</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <title>Hasanboy - Typing System v4.1</title>
     <style>
-        :root { 
-            --neon: #00ff41; 
-            --bg: #0a0a0f; 
-            --glass: rgba(0, 20, 0, 0.9);
-            --bg-img: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070&auto=format&fit=crop'); 
-        }
-        
+        :root { --neon: #00ff41; --bg: #0a0a0f; --glass: rgba(0, 25, 0, 0.95); }
         * { box-sizing: border-box; outline: none; }
-        
         body { 
-            margin: 0; 
-            background: var(--bg-img) no-repeat center center fixed;
-            background-size: cover;
-            color: var(--neon); 
-            font-family: 'Courier New', monospace; 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh; 
-            overflow-x: hidden;
+            margin: 0; background: #000; color: var(--neon); 
+            font-family: 'Courier New', monospace; min-height: 100vh; overflow-x: hidden;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.88);
-            z-index: -1;
+        /* Auth Overlay - Xato tuzatildi (justify-content) */
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; align-items: center; justify-content: center; z-index: 3000;
         }
-        
-        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        
-        .container { 
-            width: 100%; 
-            max-width: 900px; 
-            padding: 25px; 
-            background: var(--glass); 
-            border: 1px solid var(--neon); 
-            border-radius: 15px; 
-            text-align: center; 
-            backdrop-filter: blur(15px);
-            box-shadow: 0 0 25px rgba(0, 255, 65, 0.2);
-        }
-
-        /* Login Oynasi - Hacker Style */
-        #login-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            display: flex; align-items: center; justify-content: center;
-            z-index: 2000;
-        }
-
-        .login-card {
-            background: rgba(0, 40, 0, 0.3);
-            border: 2px solid var(--neon);
-            padding: 35px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 380px;
+        .auth-card {
+            background: var(--glass); border: 2px solid var(--neon);
+            padding: 30px; border-radius: 15px; width: 400px; text-align: center;
             box-shadow: 0 0 30px var(--neon);
         }
-
-        .login-card input {
-            width: 100%;
-            background: #000;
-            border: 1px solid var(--neon);
-            color: var(--neon);
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-family: inherit;
+        .auth-card input, .auth-card select {
+            width: 100%; background: #000; border: 1px solid var(--neon);
+            color: var(--neon); padding: 12px; margin: 8px 0; font-size: 1rem; border-radius: 5px;
         }
-        
-        .controls { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        
+
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center; padding: 15px 30px;
+            border-bottom: 1px solid var(--neon); background: rgba(0,0,0,0.8);
+        }
         .btn { 
-            background: transparent; 
-            border: 1px solid var(--neon); 
-            color: var(--neon); 
-            padding: 8px 18px; 
-            cursor: pointer; 
-            transition: 0.2s; 
-            text-transform: uppercase;
-            font-size: 0.85rem;
+            background: transparent; border: 1px solid var(--neon); 
+            color: var(--neon); padding: 8px 15px; cursor: pointer; text-transform: uppercase;
+            font-family: inherit; font-size: 0.8rem; margin: 2px;
         }
+        .btn:hover, .btn.active { background: var(--neon); color: #000; box-shadow: 0 0 10px var(--neon); }
 
-        .btn.active { background: var(--neon); color: #000; font-weight: bold; box-shadow: 0 0 15px var(--neon); }
-        
-        .stats-bar { 
-            display: flex; 
-            justify-content: space-around; 
-            padding: 15px; 
-            border: 1px solid rgba(0, 255, 65, 0.3);
-            margin-bottom: 20px; 
-            background: rgba(0,0,0,0.5);
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
+        .container { max-width: 1000px; margin: 20px auto; padding: 20px; text-align: center; }
         #text-display { 
-            font-size: 1.4rem; 
-            line-height: 1.6; 
-            text-align: left; 
-            min-height: 120px;
-            margin: 20px 0; 
-            color: rgba(0, 255, 65, 0.2); 
-            padding: 15px; 
-            word-wrap: break-word;
-            user-select: none;
+            font-size: 1.6rem; text-align: left; min-height: 100px; margin: 20px 0; 
+            color: rgba(0, 255, 65, 0.2); padding: 20px; line-height: 1.6; border: 1px solid rgba(0,255,65,0.1);
+            word-break: break-all;
         }
-        
-        .char { transition: 0.05s; position: relative; }
-        .correct { color: var(--neon); text-shadow: 0 0 8px var(--neon); }
-        .incorrect { color: #ff0000; background: rgba(255, 0, 0, 0.2); border-radius: 2px; }
-        .current { border-bottom: 2px solid var(--neon); animation: blink 0.8s infinite; }
-        
+        .char.correct { color: var(--neon); text-shadow: 0 0 8px var(--neon); }
+        .char.incorrect { color: #ff0000; background: rgba(255, 0, 0, 0.2); }
+        .char.current { border-bottom: 3px solid var(--neon); animation: blink 0.8s infinite; }
         @keyframes blink { 50% { border-color: transparent; } }
 
-        #hidden-input { position: fixed; top: -100px; opacity: 0; }
-
-        .about-section { 
-            margin-top: 30px; 
-            padding: 15px;
-            border-top: 1px solid rgba(0,255,65,0.2); 
-            font-size: 0.9rem; 
+        #keyboard-container {
+            margin-top: 30px; display: flex; flex-direction: column; align-items: center;
         }
+        .keyboard-row { display: flex; gap: 5px; margin-bottom: 5px; }
+        .key {
+            width: 50px; height: 50px; border: 1px solid var(--neon);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1rem; border-radius: 5px;
+            background: rgba(0, 255, 65, 0.05); transition: 0.1s;
+        }
+        .key.active { background: var(--neon); color: #000; transform: scale(0.9); box-shadow: 0 0 15px var(--neon); }
+        .key.space { width: 300px; }
 
-        footer { padding: 20px; text-align: center; background: rgba(0,0,0,0.9); width: 100%; }
-        footer a { color: var(--neon); text-decoration: none; border-bottom: 1px solid transparent; }
-        footer a:hover { border-bottom: 1px solid var(--neon); }
+        .stats { display: flex; justify-content: center; gap: 40px; font-size: 1.3rem; margin-top: 10px; }
+        #hidden-input { position: fixed; top: -100px; opacity: 0; }
+        .hidden { display: none !important; }
 
-        /* Mobil qurilmalar uchun moslashuvchanlik */
-        @media (max-width: 600px) {
-            #text-display { font-size: 1.1rem; }
-            .container { padding: 15px; }
-            .btn { padding: 6px 12px; font-size: 0.75rem; }
+        @media (max-width: 800px) {
+            #keyboard-container, #toggle-kb-btn { display: none !important; }
         }
     </style>
 </head>
 <body onclick="focusGame()">
 
-    <div id="login-overlay">
-        <div class="login-card">
-            <h2 style="margin-bottom: 20px; letter-spacing: 2px;">ACCESS REQUIRED</h2>
-            <input type="email" id="email" placeholder="TERMINAL_ID (EMAIL)..." onclick="event.stopPropagation()">
-            <input type="password" id="password" placeholder="ACCESS_KEY (PASS)..." onclick="event.stopPropagation()">
-            <div style="display: flex; gap: 10px; margin-top: 15px;">
-                <button class="btn active" style="flex: 1;" onclick="handleAuth('login')">LOGIN</button>
-                <button class="btn" style="flex: 1;" onclick="handleAuth('signup')">SIGN UP</button>
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <h2 id="auth-title">KIRISH</h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="btn active" id="btn-login-tab" onclick="toggleMode('login')">KIRISH</button>
+                <button class="btn" id="btn-signup-tab" onclick="toggleMode('signup')">RO'YXATDAN O'TISH</button>
             </div>
-            <p id="auth-error" style="color: #ff0000; font-size: 0.75rem; margin-top: 15px; min-height: 20px;"></p>
+            <input type="text" id="auth-name" placeholder="ISMINGIZ...">
+            <div id="signup-extras" class="hidden">
+                <input type="number" id="auth-age" placeholder="YOSHINGIZ...">
+                <select id="auth-gender">
+                    <option value="" disabled selected>JINSINGIZ</option>
+                    <option value="erkak">ERKAK</option>
+                    <option value="ayol">AYOL</option>
+                </select>
+            </div>
+            <input type="password" id="auth-pass" placeholder="PAROL...">
+            <button class="btn active" style="width: 100%; font-size: 1rem; padding: 12px; margin-top: 10px;" onclick="processAuth()" id="auth-main-btn">TIZIMGA KIRISH</button>
+            <p id="auth-msg" style="color: #ff3333; font-size: 0.8rem; margin-top: 10px;"></p>
         </div>
     </div>
 
-    <main>
-        <div class="container">
-            <div class="controls">
-                <button class="btn active lang-btn" onclick="changeLang('uz', this)">O'ZBEK</button>
-                <button class="btn lang-btn" onclick="changeLang('en', this)">ENGLISH</button>
-                <button class="btn time-btn" onclick="setTime(15, this)">15s</button>
-                <button class="btn time-btn active" onclick="setTime(30, this)">30s</button>
-                <button class="btn time-btn" onclick="setTime(60, this)">60s</button>
-                <button class="btn time-btn" onclick="setTime(90, this)">90s</button>
+    <nav class="navbar">
+        <div style="font-weight: bold; letter-spacing: 2px;">HASANBOY_DEV</div>
+        <div>FOYDALANUVCHI: <span id="current-user">GUEST</span></div>
+        <div>
+            <button class="btn" onclick="toggleKB()" id="toggle-kb-btn">⌨️ KLAVIATURA</button>
+            <button class="btn" onclick="toggleMusic()" id="music-btn">🎵 CHALISH</button>
+            <button class="btn" onclick="nextTrack()">⏭️ KEYINGISI</button>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="controls">
+            <button class="btn active lang-btn" onclick="changeLang('uz', this)">O'ZBEK</button>
+            <button class="btn lang-btn" onclick="changeLang('ru', this)">RUSCHA</button>
+            <button class="btn lang-btn" onclick="changeLang('en', this)">ENG</button>
+            |
+            <button class="btn time-btn active" onclick="setTime(30, this)">30 SEK</button>
+            <button class="btn time-btn" onclick="setTime(60, this)">60 SEK</button>
+        </div>
+
+        <div id="text-display"></div>
+        <input type="text" id="hidden-input" autocomplete="off" spellcheck="false">
+
+        <div class="stats">
+            <span>WPM: <b id="wpm">0</b></span>
+            <span>ANIQLIK: <b id="accuracy">100</b>%</span>
+            <span>VAQT: <b id="timer">30</b>s</span>
+        </div>
+
+        <div id="keyboard-container">
+            <!-- Klaviatura qatorlari -->
+            <div class="keyboard-row">
+                <div class="key" id="key-q">Q</div><div class="key" id="key-w">W</div><div class="key" id="key-e">E</div><div class="key" id="key-r">R</div><div class="key" id="key-t">T</div><div class="key" id="key-y">Y</div><div class="key" id="key-u">U</div><div class="key" id="key-i">I</div><div class="key" id="key-o">O</div><div class="key" id="key-p">P</div>
             </div>
-
-            <div class="stats-bar">
-                <span>USER: <b id="user-display">GUEST</b></span>
-                <span>TIMER: <b id="timer">30</b>s</span>
-                <span>SPEED: <b id="wpm">0</b> WPM</span>
-                <span>ACC: <b id="accuracy">100</b>%</span>
+            <div class="keyboard-row">
+                <div class="key" id="key-a">A</div><div class="key" id="key-s">S</div><div class="key" id="key-d">D</div><div class="key" id="key-f">F</div><div class="key" id="key-g">G</div><div class="key" id="key-h">H</div><div class="key" id="key-j">J</div><div class="key" id="key-k">K</div><div class="key" id="key-l">L</div>
             </div>
-
-            <div id="text-display"></div>
-            <input type="text" id="hidden-input" autocomplete="off" spellcheck="false">
-
-            <div class="about-section">
-                <p>Architects: <b>Hasanboy</b> & <b>Sanjarbek</b> [System v2.0]</p>
+            <div class="keyboard-row">
+                <div class="key" id="key-z">Z</div><div class="key" id="key-x">X</div><div class="key" id="key-c">C</div><div class="key" id="key-v">V</div><div class="key" id="key-b">B</div><div class="key" id="key-n">N</div><div class="key" id="key-m">M</div>
+            </div>
+            <div class="keyboard-row">
+                <div class="key space" id="key-space">SPACE</div>
             </div>
         </div>
     </main>
 
-    <footer>
-        <p>© 2026 | <a href="https://t.me/xsT00my" target="_blank">@Hasanboy</a> | <a href="https://t.me/saSOObr" target="_blank">@Sanjarbek</a></p>
-    </footer>
+    <audio id="bg-audio" onended="nextTrack()"></audio>
 
     <script>
-        // Rasmda (image_e6a216.png) ko'rsatilgan haqiqiy Firebase sozlamalari
-        const firebaseConfig = {
-            apiKey: "AIzaSyAMlnVkcw1shnK_rFKSfrZqofViB5J3wGo",
-            authDomain: "type-test-9.firebaseapp.com",
-            projectId: "type-test-9",
-            storageBucket: "type-test-9.firebasestorage.app",
-            messagingSenderId: "321070843199",
-            appId: "1:321070843199:web:cdfcdf67ce64da0beabf8a",
-            measurementId: "G-K21PXXTNTZ"
-        };
-        firebase.initializeApp(firebaseConfig);
-
         const wordBank = {
-            uz: ["tizim", "xavfsizlik", "algoritm", "klaviatura", "bajarish", "mantiq", "server", "ma'lumot", "dastur", "kodlash", "tarmoq", "foydalanuvchi", "xaker", "kriptografiya", "interfeys"],
-            en: ["system", "security", "algorithm", "keyboard", "execute", "logic", "server", "database", "program", "coding", "network", "user", "hacker", "encryption", "interface"]
+            uz: ["tizim", "mantiq", "dastur", "kodlash", "tarmoq", "xaker", "kripto", "algoritm", "klaviatura", "bajarish"],
+            ru: ["система", "логика", "программа", "код", "сеть", "хакер", "крипто", "алгоритм", "клавиатура", "выполнить"],
+            en: ["system", "logic", "program", "coding", "network", "hacker", "crypto", "algorithm", "keyboard", "execute"]
         };
 
-        let currentLang = 'uz', maxTime = 30, timeLeft = 30, isPlaying = false, timerInterval = null;
-        const display = document.getElementById('text-display');
-        const input = document.getElementById('hidden-input');
+        const playlist = [
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
+        ];
 
-        function focusGame() {
-            if (document.getElementById('login-overlay').style.display === 'none') {
-                input.focus();
-            }
+        let mode = 'login', currentTrackIndex = 0, currentLang = 'uz', maxTime = 30, timeLeft = 30, isPlaying = false, timerInterval = null;
+        const audio = document.getElementById('bg-audio');
+        audio.src = playlist[currentTrackIndex];
+
+        function toggleMode(m) {
+            mode = m;
+            document.getElementById('auth-title').innerText = mode === 'login' ? 'KIRISH' : "RO'YXATDAN O'TISH";
+            document.getElementById('auth-main-btn').innerText = mode === 'login' ? 'TIZIMGA KIRISH' : "RO'YXATDAN O'TISH";
+            document.getElementById('signup-extras').classList.toggle('hidden', mode === 'login');
+            document.getElementById('btn-login-tab').classList.toggle('active', mode === 'login');
+            document.getElementById('btn-signup-tab').classList.toggle('active', mode === 'signup');
         }
 
-        function handleAuth(type) {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            const errorElement = document.getElementById('auth-error');
+        function toggleKB() { document.getElementById('keyboard-container').classList.toggle('hidden'); }
 
-            if(!email || !pass) {
-                errorElement.innerText = "MISSING_CREDENTIALS: Email and password required.";
-                return;
-            }
+        function processAuth() {
+            const name = document.getElementById('auth-name').value.trim();
+            const pass = document.getElementById('auth-pass').value.trim();
+            if (!name || !pass) return;
 
-            if(type === 'login') {
-                firebase.auth().signInWithEmailAndPassword(email, pass)
-                    .then(res => { 
-                        document.getElementById('user-display').innerText = res.user.email.split('@')[0].toUpperCase();
-                        document.getElementById('login-overlay').style.display = 'none';
-                        init();
-                    })
-                    .catch(err => errorElement.innerText = "AUTH_ERROR: " + err.message);
+            if (mode === 'signup') {
+                localStorage.setItem(name, JSON.stringify({ pass }));
+                alert("Muvaffaqiyatli ro'yxatdan o'tdingiz!");
+                toggleMode('login');
             } else {
-                firebase.auth().createUserWithEmailAndPassword(email, pass)
-                    .then(() => alert("REGISTRATION_SUCCESS: Please login now."))
-                    .catch(err => errorElement.innerText = "REG_ERROR: " + err.message);
+                const user = JSON.parse(localStorage.getItem(name));
+                if (user && user.pass === pass) {
+                    document.getElementById('current-user').innerText = name.toUpperCase();
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    init();
+                } else alert("Ism yoki parol xato!");
             }
         }
 
         function init() {
             if (timerInterval) clearInterval(timerInterval);
-            isPlaying = false; 
-            timeLeft = maxTime;
-            input.value = "";
+            isPlaying = false; timeLeft = maxTime;
             document.getElementById('timer').innerText = timeLeft;
-            document.getElementById('wpm').innerText = "0";
-            document.getElementById('accuracy').innerText = "100";
-            
+            document.getElementById('hidden-input').value = "";
             const words = wordBank[currentLang];
-            let generatedText = Array.from({length: 60}, () => words[Math.floor(Math.random() * words.length)]).join(' ');
-            display.innerHTML = generatedText.split('').map((c, i) => `<span class="char ${i===0?'current':''}">${c}</span>`).join('');
+            let text = Array.from({length: 40}, () => words[Math.floor(Math.random() * words.length)]).join(' ');
+            document.getElementById('text-display').innerHTML = text.split('').map((c, i) => `<span class="char ${i===0?'current':''}">${c}</span>`).join('');
             focusGame();
         }
 
-        input.addEventListener('input', () => {
-            if (!isPlaying && input.value.length > 0) {
+        document.getElementById('hidden-input').addEventListener('input', function(e) {
+            if (!isPlaying) {
                 isPlaying = true;
                 timerInterval = setInterval(() => {
-                    if (timeLeft > 0) { 
-                        timeLeft--; 
-                        document.getElementById('timer').innerText = timeLeft; 
-                    } else { 
-                        clearInterval(timerInterval); 
-                        isPlaying = false; 
-                        const finalWpm = document.getElementById('wpm').innerText;
-                        const finalAcc = document.getElementById('accuracy').innerText;
-                        alert(`SESSION_END\nSpeed: ${finalWpm} WPM\nAccuracy: ${finalAcc}%`); 
-                        init(); 
-                    }
+                    if (timeLeft > 0) { timeLeft--; document.getElementById('timer').innerText = timeLeft; }
+                    else { clearInterval(timerInterval); isPlaying = false; init(); }
                 }, 1000);
             }
 
-            const spans = display.querySelectorAll('.char');
-            const typedChars = input.value.split('');
-            let correctCount = 0;
-            let totalTyped = typedChars.length;
+            // Klaviatura effektini tuzatish (Xato tuzatildi)
+            const lastChar = this.value.slice(-1).toLowerCase();
+            const keyId = lastChar === ' ' ? 'key-space' : 'key-' + lastChar;
+            const keyElement = document.getElementById(keyId);
+            if (keyElement) {
+                keyElement.classList.add('active');
+                setTimeout(() => keyElement.classList.remove('active'), 150);
+            }
 
+            const spans = document.querySelectorAll('.char');
+            const typed = this.value.split('');
+            let correct = 0;
             spans.forEach((s, i) => {
                 s.classList.remove('correct', 'incorrect', 'current');
-                if (typedChars[i] == null) {
-                    if (i === totalTyped) s.classList.add('current');
-                } else {
-                    if (typedChars[i] === s.innerText) { 
-                        s.classList.add('correct'); 
-                        correctCount++; 
-                    } else {
-                        s.classList.add('incorrect');
-                    }
+                if (typed[i] == null) { if (i === typed.length) s.classList.add('current'); }
+                else {
+                    if (typed[i] === s.innerText) { s.classList.add('correct'); correct++; }
+                    else s.classList.add('incorrect');
                 }
             });
-
-            // WPM va Accuracy hisoblash
-            let timeUsed = (maxTime - timeLeft) || 1;
-            let wpm = Math.round((correctCount / 5) / (timeUsed / 60));
-            let accuracy = totalTyped > 0 ? Math.round((correctCount / totalTyped) * 100) : 100;
-            
-            document.getElementById('wpm').innerText = wpm;
-            document.getElementById('accuracy').innerText = accuracy;
-
-            // Agar matn tugasa, yangisini yuklash
-            if (totalTyped >= spans.length) init();
+            document.getElementById('wpm').innerText = Math.round((correct/5) / ((maxTime-timeLeft || 1)/60)) || 0;
+            document.getElementById('accuracy').innerText = typed.length > 0 ? Math.round((correct/typed.length)*100) : 100;
         });
 
-        function setTime(s, btn) { 
-            maxTime = s; 
-            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active')); 
-            btn.classList.add('active'); 
-            init(); 
+        function toggleMusic() {
+            const btn = document.getElementById('music-btn');
+            if (audio.paused) { audio.play(); btn.innerText = "⏸️ TO'XTATISH"; }
+            else { audio.pause(); btn.innerText = "🎵 CHALISH"; }
         }
 
-        function changeLang(l, btn) { 
-            currentLang = l; 
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active')); 
-            btn.classList.add('active'); 
-            init(); 
+        function nextTrack() {
+            currentTrackIndex = (currentTrackIndex + 1) % playlist.length;
+            audio.src = playlist[currentTrackIndex];
+            audio.play();
+            document.getElementById('music-btn').innerText = "⏸️ TO'XTATISH";
+        }
+
+        function changeLang(l, btn) {
+            currentLang = l;
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            init();
+        }
+
+        function setTime(t, btn) {
+            maxTime = t;
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            init();
+        }
+
+        function focusGame() {
+            if (document.getElementById('auth-overlay').style.display === 'none') {
+                document.getElementById('hidden-input').focus();
+            }
         }
     </script>
 </body>
